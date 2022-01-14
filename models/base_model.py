@@ -7,10 +7,6 @@ class BaseModel(nn.Module):
     def __init__(self) :
         super(BaseModel, self).__init__()
 
-    @staticmethod
-    def modify_commandline_options(parser, is_train):
-        return parser
-
     def print_network(self):
         if isinstance(self, list):
             self = self[0]
@@ -46,3 +42,10 @@ class BaseModel(nn.Module):
                     raise NotImplementedError('initialization method [%s] is not implemented' % init_type)
                 if hasattr(m, 'bias') and m.bias is not None:
                     nn.init.constant_(m.bias.data, 0.0)
+
+        self.apply(init_func)
+
+        #propagate to children
+        for m in self.children():
+            if hasattr(m, 'init_weights'):
+                m.init_weights(init_type, gain)
