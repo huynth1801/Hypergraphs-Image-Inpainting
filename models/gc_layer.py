@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
+
 
 class _NewEmptyTensorOp(torch.autograd.Function):
     @staticmethod
@@ -30,7 +30,7 @@ class GatedConv2d(nn.Conv2d):
         activation = kwargs.pop("activation", None)
         # double the out_channels for gate
         self.num_channels = args[1]
-        new_args = args[:1] + (2 * args[1], ) + args[2:]
+        new_args = args[:1] + (args[1], ) + args[2:]
         self.manual_stride = kwargs.pop("stride", 1)
         kwargs["stride"] = 1
         super().__init__(*new_args, **kwargs)
