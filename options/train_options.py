@@ -108,27 +108,17 @@ class TrainOptions():
         return self.opt
 
 
-    @staticmethod
-    def print_options(opt):
-        """print and save options"""
-
-        print('--------------Options--------------')
+    def print_options(self, opt):
+        message = ''
+        message += '----------------- Options ---------------\n'
         for k, v in sorted(vars(opt).items()):
-            print('%s: %s' % (str(k), str(v)))
-        print('----------------End----------------')
-
-        # save to the disk
-        expr_dir = os.path.join(opt.checkpoints_dir, opt.name)
-        util.mkdirs(expr_dir)
-        if opt.isTrain:
-            file_name = os.path.join(expr_dir, 'train_opt.txt')
-        else:
-            file_name = os.path.join(expr_dir, 'test_opt.txt')
-        with open(file_name, 'wt') as opt_file:
-            opt_file.write('--------------Options--------------\n')
-            for k, v in sorted(vars(opt).items()):
-                opt_file.write('%s: %s\n' % (str(k), str(v)))
-            opt_file.write('----------------End----------------\n')
+            comment = ''
+            default = self.parser.get_default(k)
+            if v != default:
+                comment = '\t[default: %s]' % str(default)
+            message += '{:>25}: {:<30}{}\n'.format(str(k), str(v), comment)
+        message += '----------------- End -------------------'
+        print(message)
 
 options = TrainOptions()
 args = options.parse()
