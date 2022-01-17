@@ -14,13 +14,13 @@ class Discriminator(BaseModel):
         self.channels = channels
         self.init_weights()
 
-        self.disc = nn.Sequential(GatedConv2d(4, channels, kernel_size=3, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
-        GatedConv2d(channels, channels*2, kernel_size=3, dilation=1, pad_type='zero',padding=1, activation='LeakyReLU'),
-        GatedConv2d(channels*2, channels*4, kernel_size=3, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
-        GatedConv2d(channels*4, channels*8, kernel_size=3, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
-        GatedConv2d(channels*8, channels*8, kernel_size=3, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
-        GatedConv2d(channels*8, channels*8, kernel_size=3, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
-        GatedConv2d(channels*8, 1, kernel_size=3, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
+        self.disc = nn.Sequential(GatedConv2d(4, channels, kernel_size=3, stride=1, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
+        GatedConv2d(channels, channels*2, kernel_size=3, stride=2, dilation=1, pad_type='zero',padding=1, activation='LeakyReLU'),
+        GatedConv2d(channels*2, channels*4, kernel_size=3, stride=2, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
+        GatedConv2d(channels*4, channels*8, kernel_size=3, stride=2, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
+        GatedConv2d(channels*8, channels*8, kernel_size=3, stride=2, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
+        GatedConv2d(channels*8, channels*8, kernel_size=3, stride=2, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
+        GatedConv2d(channels*8, 256, kernel_size=3, stride=2, dilation=1, pad_type='zero', padding=1, activation='LeakyReLU'),
 
         )
     def forward(self, inputs, mask):
@@ -32,6 +32,6 @@ class Discriminator(BaseModel):
 
 if __name__ == "__main__":
     model = Discriminator(64)
-    print(model)
+    # print(model)
     from torchsummary import summary
     print(summary(model, [(3,256,256), (1,256,256)]))
