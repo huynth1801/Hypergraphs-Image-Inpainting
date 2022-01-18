@@ -15,7 +15,7 @@ class Generator(BaseModel):
         super(Generator, self).__init__()
         self.init_weights()
 
-        # Coarse network
+        #### Coarse network #####
         self.gated_conv1 = GatedConv2d(in_channels=4, 
                                 out_channels=channels, kernel_size=7, stride=1, padding=3, dilation=1, pad_type='zero', activation='ELU')
 
@@ -52,6 +52,38 @@ class Generator(BaseModel):
                                 out_channels=256, kernel_size=3, stride=1, padding=2, dilation=2, pad_type='zero', activation='ELU')
 
         # Decoder Network for Coarse Network
+        self.gated_conv11 = GatedConv2d(in_channels=256, 
+                                out_channels=256, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        self.gated_conv12 = GatedConv2d(in_channels=256, 
+                                out_channels=256, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        self.gated_conv13 = GatedConv2d(in_channels=256, 
+                                out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        self.gated_conv14 = GatedConv2d(in_channels=128, 
+                                out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        self.gated_conv15 = GatedConv2d(in_channels=128, 
+                                out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        self.gated_conv16 = GatedConv2d(in_channels=128, 
+                                out_channels=64, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        # Concat with skip connection
+        ###
+        self.gated_conv17 = GatedConv2d(in_channels=64, 
+                                out_channels=64, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+        # Coarse out
+        self.gated_conv18 = GatedConv2d(in_channels=64, 
+                                out_channels=3, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+
+
+        ##### Refine network #####
+        
+
+
 
 
     def forward(self, inputs, mask):

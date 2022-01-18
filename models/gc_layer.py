@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch.nn import Parameter
 
 class GatedConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride = 1, padding = 0, dilation = 1, pad_type = 'reflect', activation = 'elu', norm = 'none', sn = False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride = 1, padding = 0, dilation = 1, pad_type = 'reflect', activation = 'ELU', norm = 'none', sn = False):
         super(GatedConv2d, self).__init__()
         # Initialize the padding scheme
         if pad_type == 'reflect':
@@ -29,13 +29,13 @@ class GatedConv2d(nn.Module):
             assert 0, "Unsupported normalization: {}".format(norm)
         
         # Initialize the activation funtion
-        if activation == 'relu':
+        if activation == 'ReLU':
             self.activation = nn.ReLU(inplace = True)
         elif activation == 'LeakyReLU':
             self.activation = nn.LeakyReLU(0.2, inplace = True)
-        elif activation == 'elu':
+        elif activation == 'ELU':
             self.activation = nn.ELU()
-        elif activation == 'selu':
+        elif activation == 'SELU':
             self.activation = nn.SELU(inplace = True)
         elif activation == 'tanh':
             self.activation = nn.Tanh()
