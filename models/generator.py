@@ -21,7 +21,6 @@ class Generator(BaseModel):
                                 out_channels=channels, kernel_size=7, stride=1, padding=3, dilation=1, pad_type='zero', activation='ELU')
 
         # Encoder for coarse network
-        skip_connections = []
         self.gated_conv2 = GatedConv2d(in_channels=64, 
                                 out_channels=128, kernel_size=3, stride=2, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
@@ -59,9 +58,9 @@ class Generator(BaseModel):
         self.gated_conv12 = GatedConv2d(in_channels=256, 
                                 out_channels=256, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
-        self.gated_conv13 = GatedConv2d(in_channels=256, 
+        self.gated_deconv13 = TransposeGatedConv2d(in_channels=256, 
                                 out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
-
+        # Concatenate with 4
         self.gated_conv14 = GatedConv2d(in_channels=128, 
                                 out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
@@ -119,9 +118,9 @@ class Generator(BaseModel):
                             stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
         # Apply Hypergraph convolution on last skip connections
-        self.graph1 = HypergraphConv(in_channels=256, out_channels=512, num_edges=128, training=True)
+        self.graph1 = HypergraphConv(in_channels=256, out_channels=512, training=True)
         self.elu_g1 = nn.ELU()
-        self.graph2 = HypergraphConv(in_channels=128, out_channels=128, num_edges=128, training=True)
+        self.graph2 = HypergraphConv(in_channels=128, out_channels=128, training=True)
         self.elu_g2 = nn.ELU()
 
         # Doing the first Deconvolution operation
@@ -161,11 +160,38 @@ class Generator(BaseModel):
                                     padding=1, dilation=1, pad_type='zero', activation='ELU')
         self.rf_out = GatedConv2d(in_channels=64, out_channels=3, kernel_size=3, stride=1,
                                     padding=1, dilation=1, pad_type='zero', activation='ELU')
-    def forward(self, inputs, mask):
-        x = torch.cat([inputs, mask], dim=1)
+    
+    
+    def forward(self, img, mask):
+        # img: entire img
+        # mask: 1 for mask region; 0 for unmask region
+        # Coarse
+        skip_connections = []
+        first_masked_img = img * (1 - mask) + mask
+        x = torch.cat([first_masked_img, mask], dim=1)
         x = self.gated_conv1(x)
-        x = self.model(x)
-        x = self.skip_connections(x)
+        x = self.gated_conv2(x)
+        x = self.gated_conv3(x)
+        x = self.gated_conv4(x)
+        skip_connections.append(x)
+        x = self.gated_conv5(x)
+        x = self.gated_conv6(x)
+        x = self.gated_conv7(x)
+        x = self.gated_conv8(x)
+        x = self.gated_conv9(x)
+        x = self.gated_conv10(x)
+        # Decoder for coarse
+        x = self.gated_conv11(x)
+        x = self.gated_conv12(x)
+        x = self.gated_deconv13(x)
+        x = torch.cat((x, skip_connections[0]), dim=1)
+        x = self.gated_conv14(x)
+        x = self.gated_conv15(x)
+        x = self.gated_conv16(x)
+        x = self.gated_conv17(x)
+        coarse_out = self.gated_conv18(x)
+        # Refine network
+        x = self.refine1()
         return x
 
 
