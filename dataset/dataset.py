@@ -57,3 +57,19 @@ class InpaintingData(Dataset):
         return image, mask, filename
 
 
+if __name__=='__main__':
+
+    from attrdict import AttrDict
+    args = {
+        'dir_image': '../../../dataset',
+        'data_train': 'celeba-hq',
+        'dir_mask': '../../../dataset',
+        'mask_type': '1',
+        'image_size': 256
+    }
+    args = AttrDict(args)
+
+    data = InpaintingData(args)
+    print(len(data), len(data.mask_path))
+    img, mask, filename = data[0]
+    print(img.size(), mask.size(), filename)
