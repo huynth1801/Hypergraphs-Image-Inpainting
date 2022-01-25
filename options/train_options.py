@@ -29,12 +29,13 @@ class TrainOptions():
         self.parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment.')
 
         # Input/output size
+        self.parser.add_argument('--image_size', type=int, default='256', help='Size of image')
         self.parser.add_argument('--image_shape', type=str, default='256,256,3')
         self.parser.add_argument('--batch_size', type=int, default='1', help='Batch size use during training')
         self.parser.add_argument ('--buffer_size', type=int, default=500, help='buffer size for data')
 
         # Mask options
-        self.parser.add_argument ('--random_mask', type=int, default=0, help='0 -> Center 128 * 128 mask, 1 -> random mask')
+        self.parser.add_argument ('--mask_type', type=int, default=0, help='0 -> Center 128 * 128 mask, 1 -> random mask')
         self.parser.add_argument ('--random_mask_type', type=str, default='irregular_mask', help='options - irregular_mask and random_rect')
         self.parser.add_argument ('--incremental_training', type=int, default=1, help='1 -> using incremental training, 0 -> not using incremental training')
 
