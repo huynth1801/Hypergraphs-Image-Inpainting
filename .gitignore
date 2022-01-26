@@ -2,3 +2,6 @@
 models/__pycache__
 Random_masks_50-60
 utils/__pycache__
+Training/HypergraphII_celeba-hq_shape256x256_center_mask_incremental
+training_checkpoints
+data/

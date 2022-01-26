@@ -63,7 +63,7 @@ class Generator(BaseModel):
                                 out_channels=256, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
         self.gated_deconv13 = TransposeGatedConv2d(in_channels=256, 
-                                out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
+                                out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU', sn=False)
         # Concatenate with 4
         self.gated_conv14 = GatedConv2d(in_channels=128, 
                                 out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
@@ -122,14 +122,14 @@ class Generator(BaseModel):
                             stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
         # Apply Hypergraph convolution on last skip connections
-        self.graph1 = HypergraphConv(in_channels=512, out_channels=512, training=True)
+        self.graph1 = HypergraphConv(in_channels=512, out_channels=512)
         self.elu_g1 = nn.ELU()
-        self.graph2 = HypergraphConv(in_channels=256, out_channels=128, training=True)
+        self.graph2 = HypergraphConv(in_channels=256, out_channels=128)
         self.elu_g2 = nn.ELU()
 
         # Doing the first Deconvolution operation
         self.de_gt1 = TransposeGatedConv2d(in_channels=1024, out_channels=512, kernel_size=3, stride=1,
-                                padding=1, dilation=1, pad_type='zero', activation='ELU')
+                                padding=1, dilation=1, pad_type='zero', activation='ELU', sn=False)
         #  Concaternate
 
         # Decoder for refine network
@@ -141,7 +141,7 @@ class Generator(BaseModel):
         self.dec_rf3 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1,
                                     padding=1, dilation=2, pad_type='zero', activation='ELU')
         self.dec_rf4 = TransposeGatedConv2d(in_channels=512, out_channels=256, kernel_size=3, stride=1,
-                                    padding=1, dilation=1, pad_type='zero', activation='ELU')
+                                    padding=1, dilation=1, pad_type='zero', activation='ELU', sn=False)
         
         # concat x4 with skip[1][0]
         self.dec_rf5 = GatedConv2d(in_channels=256, out_channels=256, kernel_size=3, stride=1,
@@ -149,7 +149,7 @@ class Generator(BaseModel):
         self.dec_rf6 = GatedConv2d(in_channels=256, out_channels=256, kernel_size=3, stride=1,
                                     padding=1, dilation=1, pad_type='zero', activation='ELU')
         self.dec_rf7 = TransposeGatedConv2d(in_channels=256, out_channels=128, kernel_size=3, stride=1,
-                                    padding=1, dilation=1, pad_type='zero', activation='ELU')
+                                    padding=1, dilation=1, pad_type='zero', activation='ELU', sn=False)
         # Concat x7 with skip[0][0]
         self.dec_rf8 = GatedConv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1,
                                     padding=1, dilation=1, pad_type='zero', activation='ELU')

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import glob
+from glob import glob
 from PIL import Image, ImageFilter
 import torch
 import torch.nn as nn
@@ -18,8 +18,8 @@ class InpaintingData(Dataset):
         # Image and mask
         self.image_path = []
         for ext in ['*.jpg', '*.png']:
-            self.image_path.extend(glob(os.path.join(opt.train_dir, ext)))
-        self.mask_path = glob(os.path.join(opt.dir_mask, opt.mask_type, '*.png'))
+            self.image_path.extend(glob(os.path.join(opt.dir_image, opt.data_train, ext)))
+        self.mask_path = glob(os.path.join(opt.dir_mask, opt.mask_type, '*.jpg'))
 
         # Augumentation
         self.img_transform = transforms.Compose([
@@ -30,7 +30,7 @@ class InpaintingData(Dataset):
         self.mask_trans = transforms.Compose([
             transforms.Resize(opt.image_size, interpolation=transforms.InterpolationMode.NEAREST),
             transforms.RandomRotation(
-                (0, 45), interpolation=transforms.InterpolationMode.NEAREST),
+                (0, 45), interpolation=transforms.InterpolationMode.NEAREST)
         ])
 
 
@@ -42,7 +42,7 @@ class InpaintingData(Dataset):
         image = Image.open(self.image_path[index]).convert('RGB')
         filename = os.path.basename(self.image_path[index])
 
-        if self.mask_type == '1':
+        if self.mask_type == 'Random_masks_50-60':
             index = np.random.randint(0, len(self.mask_path))
             mask = Image.open(self.mask_path[index])
             mask = mask.convert('L')
@@ -52,19 +52,19 @@ class InpaintingData(Dataset):
             mask = Image.fromarray(mask).convert('L')
 
         # augment
-        image = self.img_trans(image) * 2. - 1.
-        mask = F.to_tensor(self.mask_trans(mask))
+        image = self.img_transform(image) * 2. - 1.
+        mask = transforms.ToTensor()(self.mask_trans(mask))
         return image, mask, filename
 
 
 if __name__=='__main__':
-
+    
     from attrdict import AttrDict
     args = {
-        'dir_image': '../../../dataset',
-        'data_train': 'celeba-hq',
-        'dir_mask': '../../../dataset',
-        'mask_type': '1',
+        'dir_image': '/home/huynth/Hypergraph-Inpainting/data',
+        'data_train': 'place2',
+        'dir_mask': '/home/huynth/Hypergraph-Inpainting/data',
+        'mask_type': 'Random_masks_50-60',
         'image_size': 256
     }
     args = AttrDict(args)
