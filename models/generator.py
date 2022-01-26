@@ -65,7 +65,7 @@ class Generator(BaseModel):
         self.gated_deconv13 = TransposeGatedConv2d(in_channels=256, 
                                 out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU', sn=False)
         # Concatenate with 4
-        self.gated_conv14 = GatedConv2d(in_channels=128, 
+        self.gated_conv14 = GatedConv2d(in_channels=256, 
                                 out_channels=128, kernel_size=3, stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
         self.gated_conv15 = GatedConv2d(in_channels=128, 
@@ -114,26 +114,26 @@ class Generator(BaseModel):
                             stride=1, padding=2, dilation=2, pad_type='zero', activation='ELU')
         self.refine11 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3,
                             stride=1, padding=2, dilation=2, pad_type='zero', activation='ELU')
-        self.refine12 = GatedConv2d(in_channels=512, out_channels=1024, kernel_size=3,
+        self.refine12 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3,
                             stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
-        self.refine13 = GatedConv2d(in_channels=1024, out_channels=1024, kernel_size=3,
+        self.refine13 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3,
                             stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
-        self.refine14 = GatedConv2d(in_channels=1024, out_channels=1024, kernel_size=3,
+        self.refine14 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3,
                             stride=1, padding=1, dilation=1, pad_type='zero', activation='ELU')
 
         # Apply Hypergraph convolution on last skip connections
-        self.graph1 = HypergraphConv(in_channels=512, out_channels=512)
+        self.graph1 = HypergraphConv(in_channels=16, out_channels=512)
         self.elu_g1 = nn.ELU()
         self.graph2 = HypergraphConv(in_channels=256, out_channels=128)
         self.elu_g2 = nn.ELU()
 
         # Doing the first Deconvolution operation
-        self.de_gt1 = TransposeGatedConv2d(in_channels=1024, out_channels=512, kernel_size=3, stride=1,
+        self.de_gt1 = TransposeGatedConv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1,
                                 padding=1, dilation=1, pad_type='zero', activation='ELU', sn=False)
         #  Concaternate
 
         # Decoder for refine network
-        self.dec_rf1 = GatedConv2d(in_channels=1024, out_channels=512, kernel_size=3, stride=1,
+        self.dec_rf1 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1,
                                     padding=1, dilation=2, pad_type='zero', activation='ELU')
 
         self.dec_rf2 = GatedConv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1,
@@ -189,7 +189,7 @@ class Generator(BaseModel):
         x = self.gated_conv12(x)
         x = self.gated_deconv13(x)
         x = torch.cat((x, skip_connections[0]), dim=1)
-        x = self.gated_conv14(x)
+        x = self.gated_conv14(x)        
         x = self.gated_conv15(x)
         x = self.gated_conv16(x)
         x = self.gated_conv17(x)
@@ -206,13 +206,11 @@ class Generator(BaseModel):
         x4 = refine_conv
         skip_connections.append(x4)
         refine_conv = self.refine5(refine_conv)
-        refine_conv = self.pool2(refine_conv)
         refine_conv = self.refine6(refine_conv)
         refine_conv = self.refine7(refine_conv)
         x7 = refine_conv
         skip_connections.append(x7)
         refine_conv = self.refine8(refine_conv)
-        refine_conv = self.pool3(refine_conv)
         refine_conv = self.refine9(refine_conv)
         refine_conv = self.refine10(refine_conv)
         refine_conv = self.refine11(refine_conv)
@@ -221,8 +219,9 @@ class Generator(BaseModel):
         refine_conv = self.refine12(refine_conv)
         refine_conv = self.refine13(refine_conv)
         refine_conv = self.refine14(refine_conv)
-        x11 = self.graph1(x11)
+        x11 = self.graph1(x11, hyperedge_index=refine_conv.squeeze().long())
         x11 = self.elu_g1(x11)
+        print("DONE")
         x7 = self.graph2(x7)
         x7 = self.elu_g2(x7)
 
@@ -252,4 +251,6 @@ class Generator(BaseModel):
 
 if __name__=='__main__':
     model = Generator(64)
-    print(model)
+    # print(model)
+    from torchsummary import summary
+    print(summary(model, [(3,256,256), (1,256,256)]))
